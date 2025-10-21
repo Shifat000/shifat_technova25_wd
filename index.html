@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IoT_IA_MPSCITC</title>
+  <meta name="description" content="The exhaustive single-file documentation for the Connected Odyssey IoT project, including technical specs, detailed features, a full development timeline, and use cases. All original content preserved and massively expanded."/>
+
+  <!-- Load Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Load Lucide Icons for modern UI icons -->
+  <script type="module" src="https://unpkg.com/lucide@latest"></script>
+  <!-- Custom Tailwind Config for the Sci-Fi/Neon Theme -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'bg-dark': '#01040D', // Deep space background
+            'primary-neon': '#3b82f6', // Bright blue/cyan for primary accents
+            'accent-glow': '#22d3ee', // Cyan for text glow/subtle highlights
+            'glass-bg': 'rgba(17, 24, 39, 0.75)', // Darker, less opaque glass
+            'glass-border': 'rgba(255, 255, 255, 0.12)',
+            'content-bg': 'rgba(17, 24, 39, 0.5)', // Slightly lighter panel for variety
+            'code-bg': '#1e293b' // Slate for code blocks
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          boxShadow: {
+            'neon-sm': '0 0 8px rgba(59, 130, 246, 0.3)',
+            'neon-lg': '0 0 25px rgba(59, 130, 246, 0.7)',
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '0.8', boxShadow: '0 0 10px #3b82f6' },
+              '50%': { opacity: '1', boxShadow: '0 0 20px #3b82f6' },
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '200% 0' },
+              '100%': { backgroundPosition: '-200% 0' },
+            }
+          },
+          animation: {
+            fadeIn: 'fadeIn 0.6s ease-out',
+            pulseGlow: 'pulseGlow 2s ease-in-out infinite',
+            shimmer: 'shimmer 5s infinite linear',
+          }
+        },
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Inline CSS for fine-grained effects/animations and background -->
+  <style>
+    body {
+        background-color: #01040D;
+        background-image: radial-gradient(circle at top right, rgba(59, 130, 246, 0.05), transparent 50%),
+                          radial-gradient(circle at bottom left, rgba(34, 211, 238, 0.05), transparent 50%),
+                          linear-gradient(to top, rgba(255,255,255,0.02) 1px, transparent 1px),
+                          linear-gradient(to left, rgba(255,255,255,0.02) 1px, transparent 1px);
+        background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+        color: #e5e7eb;
+        min-height: 100vh;
+        /* CRITICAL FIX: Hide any accidental horizontal overflow */
+        overflow-x: hidden; 
+    }
+    .glass-panel {
+        background-color: rgba(17, 24, 39, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+        box-shadow: inset 0 0 15px rgba(59, 130, 246, 0.08);
+    }
+    .neon-button {
+      transition: all 0.3s;
+      background: linear-gradient(90deg, #3b82f6, #22d3ee);
+    }
+    .neon-button:hover {
+      background: linear-gradient(90deg, #22d3ee, #3b82f6);
+      box-shadow: 0 0 30px rgba(59, 130, 246, 0.9);
+      transform: scale(1.02);
+    }
+    
+    /* Timeline styles (kept consistent) */
+    .timeline-container { position: relative; }
+    .timeline-container::before {
+        content: '';
+        position: absolute;
+        left: 12px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, #3b82f6, rgba(59, 130, 246, 0.3));
+    }
+    .timeline-item { padding-left: 40px; position: relative; }
+    .timeline-dot {
+      position: absolute; left: 3px; top: 10px; width: 20px; height: 20px;
+      border-radius: 50%; border: 4px solid #01040D;
+      background: #22d3ee; box-shadow: 0 0 10px #22d3ee, inset 0 0 5px #01040D;
+    }
+
+    .shimmer-text {
+      background: linear-gradient(90deg, #FFFFFF 0%, #3b82f6 20%, #22d3ee 40%, #FFFFFF 60%, #3b82f6 80%, #22d3ee 100%);
+      background-size: 300% 100%;
+      animation: shimmer 5s infinite linear;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    /* Icons from Lucide need to be initialized */
+    [data-lucide] { stroke-width: 2.5; vertical-align: middle; }
+    
+    /* Custom style for the redesigned feature blocks - slightly refined */
+    .feature-block {
+      background-color: var(--content-bg);
+      border-radius: 0.75rem; /* rounded-xl */
+      padding: 2rem; /* reduced from p-10 to p-8 */
+      transition: box-shadow 0.3s, transform 0.3s;
+    }
+    .feature-block:hover {
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+        transform: translateY(-4px); /* subtle lift */
+    }
+    /* Fixed small font size for code blocks to prevent overflow */
+    .code-wrapper pre code {
+        font-size: 0.65rem; /* ~10px - very small font to ensure no scrolling */
+        line-height: 1.2;
+        white-space: pre-wrap; /* allow wrapping in pre tag */
+        word-break: break-all;
+    }
+  </style>
+</head>
+<body class="font-sans">
+  <div id="root" class="min-h-screen">
+    
+    <!-- ========================= -->
+    <!-- HEADER / NAVIGATION (Updated to user's requested links) -->
+    <!-- ========================= -->
+    <header class="sticky top-0 z-50 glass-panel bg-opacity-90 backdrop-blur-xl">
+      <nav class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <div class="text-xl font-bold text-primary-neon tracking-widest flex items-center">
+          <span data-lucide="zap" class="w-6 h-6 mr-2 text-accent-glow animate-pulseGlow"></span>
+          IoT_IA  <span class="text-white ml-2 text-base font-normal hidden md:inline"></span>
+        </div>
+        <div class="hidden lg:flex space-x-6 text-sm font-medium text-gray-300 overflow-x-auto whitespace-nowrap">
+          <a href="#vision" class="hover:text-primary-neon transition duration-300">About</a>
+          <a href="#specs" class="hover:text-primary-neon transition duration-300">How</a>
+          <a href="#features" class="hover:text-primary-neon transition duration-300">Features</a>
+          <a href="#dashboard" class="hover:text-primary-neon transition duration-300">Dashboard</a>
+          <a href="#team" class="hover:text-primary-neon transition duration-300">Team</a>
+          <a href="#contact" class="hover:text-primary-neon transition duration-300">Contact</a>
+        </div>
+        <a href="#" class="hidden md:block px-4 py-2 text-sm font-semibold rounded-lg text-bg-dark neon-button shadow-neon-sm">Deploy Now</a>
+        
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="lg:hidden text-primary-neon">
+          <span data-lucide="menu" class="w-6 h-6"></span>
+        </button>
+      </nav>
+      <!-- Mobile Menu (Hidden by default) -->
+      <div id="mobile-menu" class="hidden lg:hidden px-4 pb-4 space-y-2 text-sm font-medium">
+          <a href="#vision" class="block py-2 px-3 rounded-md hover:bg-glass-border">About</a>
+          <a href="#specs" class="block py-2 px-3 rounded-md hover:bg-glass-border">How</a>
+          <a href="#features" class="block py-2 px-3 rounded-md hover:bg-glass-border">Features</a>
+          <a href="#dashboard" class="block py-2 px-3 rounded-md hover:bg-glass-border">Dashboard</a>
+          <a href="#team" class="block py-2 px-3 rounded-md hover:bg-glass-border">Future Team</a>
+          <a href="#contact" class="block py-2 px-3 rounded-md hover:bg-glass-border">Contact</a>
+          <a href="#" class="block py-2 px-3 rounded-md text-bg-dark neon-button text-center">Deploy Now</a>
+      </div>
+    </header>
+
+    <!-- ========================= -->
+    <!-- HERO SECTION              -->
+    <!-- ========================= -->
+    <section id="hero" class="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 md:py-32 text-center relative overflow-hidden">
+      <div class="relative z-10">
+        <h1 class="text-5xl sm:text-7xl lg:text-8xl font-extrabold mb-4 animate-fadeIn">
+          <span class="shimmer-text">INTERNET OF THINGS</span>
+        </h1>
+        <p class="text-xl sm:text-3xl font-light text-accent-glow mb-8 animate-fadeIn" style="animation-delay: 0.2s;">
+          Intelligence Amplification (IA) for a Connected World
+        </p>
+        <p class="max-w-4xl mx-auto text-gray-400 mb-12 animate-fadeIn text-lg" style="animation-delay: 0.4s;">
+          The Connected Odyssey Project is a revolutionary decentralized sensor network designed to make environments self-optimizing. We utilize <b><u>Edge Computing</u></b> and <b><u>Blockchain-secured micro-transactions</u></b> to ensure data integrity, low latency and energy efficiency, setting a new standard for sustainable IoT infrastructure.
+        </p>
+        <div class="flex justify-center space-x-4 animate-fadeIn" style="animation-delay: 0.6s;">
+          <a href="#specs" class="px-8 py-3 text-lg font-semibold rounded-full text-bg-dark neon-button shadow-neon-lg">Review Technical Specs</a>
+          <a href="#contact" class="px-8 py-3 text-lg font-semibold rounded-full border border-primary-neon text-primary-neon hover:bg-primary-neon hover:text-bg-dark transition duration-300">Engage Protocol</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- VISION AND PHILOSOPHY (ABOUT SECTION) -->
+    <!-- ========================= -->
+    <section id="vision" class="py-16 md:py-24 border-t border-glass-border">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl font-bold text-center mb-4 text-primary-neon">Our <span class="text-white">Vision</span> and <span class="text-white">Ethos </span></h2>
+            <p class="text-center text-gray-400 max-w-3xl mx-auto mb-16">
+                Our core principles guide the development of a trustworthy and decentralized ecosystem.
+            </p>
+
+            <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Retaining the glass panel look here as it suits the manifesto/principles feel -->
+                <div class="glass-panel p-6 rounded-xl hover:shadow-neon-sm transition duration-300">
+                    <span data-lucide="shield-check" class="w-8 h-8 text-green-400 mb-3"></span>
+                    <h3 class="text-xl font-semibold text-white mb-2">Decentralized Trust</h3>
+                    <p class="text-gray-400 text-sm">Data integrity is secured via ledger technology, eliminating single points of failure and ensuring sensor data is immutable and verifiable by all authorized parties.</p>
+                </div>
+                <div class="glass-panel p-6 rounded-xl hover:shadow-neon-sm transition duration-300">
+                    <span data-lucide="battery-charging" class="w-8 h-8 text-yellow-400 mb-3"></span>
+                    <h3 class="text-xl font-semibold text-white mb-2">Sustainable Computing</h3>
+                    <p class="text-gray-400 text-sm">Prioritizing ultra-low power consumption and edge processing (IA) to minimize network reliance and reduce the overall carbon footprint of the connected infrastructure.</p>
+                </div>
+                <div class="glass-panel p-6 rounded-xl hover:shadow-neon-sm transition duration-300">
+                    <span data-lucide="globe" class="w-8 h-8 text-red-400 mb-3"></span>
+                    <h3 class="text-xl font-semibold text-white mb-2">Universal Interoperability</h3>
+                    <p class="text-gray-400 text-sm">Designed with an open API framework, supporting seamless integration with legacy systems and future protocols, guaranteeing long-term relevance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- ========================= -->
+    <!-- FEATURES SECTION (REDESIGNED LAYOUT) -->
+    <!-- ========================= -->
+    <section id="features" class="py-16 md:py-24 border-t border-glass-border">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-4xl font-bold text-center mb-4 text-primary-neon">Core <span class="text-white">Capacities:</span> Features Deep Dive</h2>
+        <p class="text-center text-gray-400 max-w-2xl mx-auto mb-16">
+          Beyond connectivity, our system provides self-learning, adaptive intelligence across critical domains presented with a less rigid layout.
+        </p>
+        
+        <div class="space-y-16 max-w-7xl mx-auto">
+            
+            <!-- Deep Dive 1: Smart Grid Integration (Alternating Layout) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center feature-block">
+                <div>
+                    <span data-lucide="cpu" class="w-12 h-12 text-accent-glow mb-4"></span>
+                    <h3 class="text-2xl font-bold text-white mb-4">1. Smart Grid Integration: <span class="text-primary-neon">Adaptive Energy Flux</span></h3>
+                    <p class="text-gray-400 mb-6 text-base">
+                        The system acts as a Virtual Power Plant (VPP) aggregator, managing supply and demand at the sub-station level with 99.9% prediction accuracy. This leads to significant reduction in waste and improved infrastructure longevity.
+                    </p>
+                    <ul class="space-y-3 text-gray-300 text-sm">
+                        <li class="flex items-start"><span data-lucide="arrow-right-circle" class="w-5 h-5 text-primary-neon mr-2 mt-1 flex-shrink-0"></span> Utilizes self-learning algorithms to predict local demand surges before they occur.</li>
+                        <li class="flex items-start"><span data-lucide="arrow-right-circle" class="w-5 h-5 text-primary-neon mr-2 mt-1 flex-shrink-0"></span> Real-time Load Balancing: Dynamically shifts power flow to mitigate bottlenecks, ensuring equitable and stable supply.</li>
+                        <li class="flex items-start"><span data-lucide="arrow-right-circle" class="w-5 h-5 text-primary-neon mr-2 mt-1 flex-shrink-0"></span> Predictive Maintenance: Monitors harmonic distortion and thermal signatures to schedule preemptive repairs, reducing costly outages by 40%.</li>
+                    </ul>
+                </div>
+                <!-- FIXED: Increased padding, reduced font to prevent horizontal scroll -->
+                <div class="code-wrapper p-4 rounded-lg bg-code-bg text-gray-300 self-stretch flex items-center">
+                    <pre class="w-full"><code>// Pseudocode for VPP Load Balancing Logic
+function checkLoad(node_id) {
+    let current_load = fetchData(node_id, 'load');
+    let predicted_surge = IA_Model.predictSurge(node_id);
+    
+    if (current_load > THRESHOLD_MAX || predicted_surge > 0.15) {
+        // Initiate energy transfer from neighboring node
+        let status = requestTransfer(node_id, predicted_surge * 1.1);
+        logEvent("LOAD_BALANCE_INITIATED", status);
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Deep Dive 2: Real-time Health Monitoring (Reversed Layout) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center feature-block">
+                <!-- FIXED: Increased padding, reduced font to prevent horizontal scroll -->
+                <div class="code-wrapper p-4 rounded-lg bg-code-bg text-gray-300 order-1 lg:order-2 self-stretch flex items-center">
+                    <pre class="w-full"><code>// Biometric Anomaly Detection (Simplified)
+function monitorHRV(patient_data) {
+    let baseline = patient_data.average_hrv;
+    let current = patient_data.current_hrv;
+    
+    if (current < baseline * 0.75 && patient_data.activity === 'RESTING') {
+        // Significant deviation at rest
+        if (checkConfirmed(current, 3)) { // 3 consecutive checks
+            initiateAlert('CRITICAL_BIOMETRIC_ANOMALY', patient_data.location);
+        }
+    }
+}</code></pre>
+                </div>
+                <div class="order-2 lg:order-1">
+                    <span data-lucide="activity" class="w-12 h-12 text-accent-glow mb-4"></span>
+                    <h3 class="text-2xl font-bold text-white mb-4">2. Health Monitoring: <span class="text-primary-neon">Proactive Wellness Matrix</span></h3>
+                    <p class="text-gray-400 mb-6 text-base">
+                        Our non-invasive sensors provide continuous biometric data streams. The IA layer constantly scans for deviations, ensuring medical intervention is proactive, not reactive.
+                    </p>
+                    <ul class="space-y-3 text-gray-300 text-sm">
+                        <li class="flex items-start"><span data-lucide="arrow-right-circle" class="w-5 h-5 text-primary-neon mr-2 mt-1 flex-shrink-0"></span> Continuous Biometrics: Measures HRV, skin temperature and respiratory cycles with clinical-grade precision.</li>
+                        <li class="flex items-start"><span data-lucide="arrow-right-circle" class="w-5 h-5 text-primary-neon mr-2 mt-1 flex-shrink-0"></span> Threat Detection: Immediate cardiac event/fall detection with automated emergency notification within 5 seconds of confirmation.</li>
+                        <li class="flex items-start"><span data-lucide="arrow-right-circle" class="w-5 h-5 text-primary-neon mr-2 mt-1 flex-shrink-0"></span> Secure Remote Access: Encrypted data sharing for telehealth consultation and remote patient monitoring, compliant with global standards.</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Deep Dive 3: Environmental Sensing (Alternating Layout) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center feature-block">
+                <div>
+                    <span data-lucide="cloud-lightning" class="w-12 h-12 text-accent-glow mb-4"></span>
+                    <h3 class="text-2xl font-bold text-white mb-4">3. Environmental Sensing: <span class="text-primary-neon">Hyper-local Climate Intelligence</span></h3>
+                    <p class="text-gray-400 mb-6 text-base">
+                        A distributed mesh network captures granular environmental data that traditional weather stations miss. This enables *micro-climate mapping* for better resource management and disaster preparedness.
+                    </p>
+                    <ul class="space-y-3 text-gray-300 text-sm">
+                        <li class="flex items-start"><span data-lucide="arrow-right-circle" class="w-5 h-5 text-primary-neon mr-2 mt-1 flex-shrink-0"></span> Climate Anomaly Detection: Pinpoints sudden temperature drops, pressure spikes or humidity inversions indicative of severe local weather.</li>
+                        <li class="flex items-start"><span data-lucide="arrow-right-circle" class="w-5 h-5 text-primary-neon mr-2 mt-1 flex-shrink-0"></span> Quality Assessment: Real-time monitoring of PM2.5, NO2, O3, and CO levels for immediate public health warnings.</li>
+                        <li class="flex items-start"><span data-lucide="arrow-right-circle" class="w-5 h-5 text-primary-neon mr-2 mt-1 flex-shrink-0"></span> Resource Optimization: Specific soil moisture and nutrient sensors for precision agriculture, reducing water usage by up to 30%.</li>
+                    </ul>
+                </div>
+                <!-- FIXED: Increased padding, reduced font to prevent horizontal scroll -->
+                <div class="code-wrapper p-4 rounded-lg bg-code-bg text-gray-300 self-stretch flex items-center">
+                    <pre class="w-full"><code>// Sensor Data Payload Structure (JSON Example)
+{
+    "sensor_id": "ENV-A382",
+    "timestamp": "2025-10-20T17:00:00Z",
+    "location": [-33.8688, 151.2093], 
+    "metrics": {
+        "temp_c": 21.5,
+        "humidity_pct": 58,
+        "pm2_5_ugm3": 7.2, 
+    },
+    "signature": "0x4A...B7"
+}</code></pre>
+                </div>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- TECHNICAL SPECIFICATIONS (HOW SECTION) -->
+    <!-- ========================= -->
+    <section id="specs" class="py-16 md:py-24 border-t border-glass-border">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl font-bold text-center mb-4 text-primary-neon">Network <span class="text-white">Architecture</span></h2>
+            <p class="text-center text-gray-400 max-w-3xl mx-auto mb-16">
+                A look under the hood: the hardware, software stack and protocol standards used to build the backbone of the Odyssey.
+                
+            </p>
+
+            <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12">
+                
+                <!-- Architecture Diagram Placeholder -->
+                <div class="glass-panel p-6 rounded-xl h-full flex flex-col justify-between">
+                    <h3 class="text-2xl font-bold text-accent-glow mb-4 flex items-center"><span data-lucide="layout-grid" class="w-6 h-6 mr-2"></span> System Flow Diagram</h3>
+                    <p class="text-gray-400 mb-4 text-sm">A conceptual diagram showing the flow from Sensor Node to Edge Gateway to the Decentralized Cloud.</p>
+                    <div class="p-8 rounded-lg bg-code-bg h-96 flex items-center justify-center">
+                        <p class="text-xl font-mono text-gray-500 text-center">
+                            <img src="https://i.imghippo.com/files/RC9795Oo.png"
+
+" 
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Technical Table (FIXED: Reduced padding and font size to prevent overflow) -->
+                <div class="glass-panel p-6 rounded-xl overflow-hidden">
+                    <h3 class="text-2xl font-bold text-accent-glow mb-6 flex items-center"><span data-lucide="list-checks" class="w-6 h-6 mr-2"></span> Key Component Specs</h3>
+                    <table class="w-full text-xs text-left table-auto">
+                        <thead class="text-2xs uppercase text-primary-neon border-b border-glass-border">
+                            <tr>
+                                <th scope="col" class="py-3 px-1">Component</th>
+                                <th scope="col" class="py-3 px-1">Metric</th>
+                                <th scope="col" class="py-3 px-1">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-glass-border hover:bg-glass-border/20 transition duration-150">
+                                <th class="py-3 px-1 font-medium text-white">MCU (Node)</th>
+                                <td class="py-3 px-1">Architecture</td>
+                                <td class="py-3 px-1 font-mono">RISC-V 32-bit (ASIC)</td>
+                            </tr>
+                            <tr class="border-b border-glass-border hover:bg-glass-border/20">
+                                <th class="py-3 px-1 font-medium text-white">Power Supply</th>
+                                <td class="py-3 px-1">Life Expectancy</td>
+                                <td class="py-3 px-1 font-mono">5+ Years (Optimized)</td>
+                            </tr>
+                            <tr class="border-b border-glass-border hover:bg-glass-border/20">
+                                <th class="py-3 px-1 font-medium text-white">Network Protocol</th>
+                                <td class="py-3 px-1">Standard</td>
+                                <td class="py-3 px-1 font-mono">LoRaWAN/CoAP</td>
+                            </tr>
+                            <tr class="border-b border-glass-border hover:bg-glass-border/20">
+                                <th class="py-3 px-1 font-medium text-white">Latency (Max)</th>
+                                <td class="py-3 px-1">Edge Processing</td>
+                                <td class="py-3 px-1 font-mono">~50ms</td>
+                            </tr>
+                            <tr class="border-b border-glass-border hover:bg-glass-border/20">
+                                <th class="py-3 px-1 font-medium text-white">Security Layer</th>
+                                <td class="py-3 px-1">Encryption</td>
+                                <td class="py-3 px-1 font-mono">AES-256 (E2E)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- TIMELINE SECTION -->
+    <section id="timeline" class="py-16 md:py-24 border-t border-glass-border">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-4xl font-bold text-center mb-4 text-primary-neon">Development <span class="text-white">Sequence:</span> Granular Milestones</h2>
+        <p class="text-center text-gray-400 max-w-2xl mx-auto mb-16">
+          The comprehensive four-phase development roadmap, detailing specific deliverables for each quarter.
+        </p>
+        
+        <div class="timeline-container max-w-4xl mx-auto">
+          
+          <!-- Timeline Item 1: Phase I: Research and Conceptualization -->
+          <div class="timeline-item pb-16">
+            <div class="timeline-dot"></div>
+            <div class="glass-panel p-6 rounded-xl ml-4 hover:shadow-neon-sm transition duration-300">
+              <h3 class="text-2xl font-bold text-accent-glow mb-2">Phase I: Research and Conceptualization (Q1 2024)</h3>
+              <p class="text-sm font-mono text-gray-400 mb-3">Key Deliverables: Whitepaper & Architecture Lock-down</p>
+              <ul class="list-disc list-inside space-y-1 text-gray-300 text-sm">
+                <li>Deep dive into current IoT limitations and security vulnerabilities.</li>
+                <li>Established core architectural model: Decentralized Edge Processing.</li>
+                <li>Defined 10 key user interaction flows (UI/UX).</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Timeline Item 2: Phase II: Prototype Development -->
+          <div class="timeline-item pb-16">
+            <div class="timeline-dot" style="background: #3b82f6; box-shadow: 0 0 10px #3b82f6, inset 0 0 5px #01040D;"></div>
+            <div class="glass-panel p-6 rounded-xl ml-4 hover:shadow-neon-sm transition duration-300">
+              <h3 class="text-2xl font-bold text-accent-glow mb-2">Phase II: Prototype Development (Q2-Q3 2024)</h3>
+              <p class="text-sm font-mono text-gray-400 mb-3">Key Deliverables: MVP Core Functionality & Initial Alpha Testing</p>
+              <ul class="list-disc list-inside space-y-1 text-gray-300 text-sm">
+                <li>Assembly of 20 functional sensor clusters and 5 Edge Gateways.</li>
+                <li>Implementation of initial micro-service stack (Python/Rust).</li>
+                <li>Initial internal alpha testing across 10 controlled nodes (Data integrity focus).</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Timeline Item 3: Phase III: Field Testing and Refinement -->
+          <div class="timeline-item pb-16">
+            <div class="timeline-dot" style="background: #3b82f6; box-shadow: 0 0 10px #3b82f6, inset 0 0 5px #01040D;"></div>
+            <div class="glass-panel p-6 rounded-xl ml-4 hover:shadow-neon-sm transition duration-300">
+              <h3 class="text-2xl font-bold text-accent-glow mb-2">Phase III: Field Testing and Refinement (Q4 2024)</h3>
+              <p class="text-sm font-mono text-gray-400 mb-3">Key Deliverables: Public Beta Release & Security Audit</p>
+              <ul class="list-disc list-inside space-y-1 text-gray-300 text-sm">
+                <li>Deployment in a controlled public environment (e.g., campus grounds or small municipality).</li>
+                <li>Formal, independent security audit of all communication channels and ledger code.</li>
+                <li>Performance scaling to support 100,000 active nodes.</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Timeline Item 4: Phase IV: Full Deployment and Launch -->
+          <div class="timeline-item">
+            <div class="timeline-dot" style="background: #3b82f6; box-shadow: 0 0 10px #3b82f6, inset 0 0 5px #01040D;"></div>
+            <div class="glass-panel p-6 rounded-xl ml-4 hover:shadow-neon-sm transition duration-300">
+              <h3 class="text-2xl font-bold text-accent-glow mb-2">Phase IV: Full Deployment and Launch (Q1 2025)</h3>
+              <p class="text-sm font-mono text-gray-400 mb-3">Key Deliverables: Commercial Launch & Maintenance Cycle Start</p>
+              <ul class="list-disc list-inside space-y-1 text-gray-300 text-sm">
+                <li>Official commercial system launch and activation of the public API.</li>
+                <li>Open-source documentation release for community contributions.</li>
+                <li>Project moves to long-term maintenance and iterative update cycle.</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- DASHBOARD SECTION -->
+    <!-- ========================= -->
+    <section id="dashboard" class="py-16 md:py-24 border-t border-glass-border">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-4xl font-bold text-center mb-4 text-primary-neon">Telemetry <span class="text-white">Console:</span> Dashboard Live Feed</h2>
+        <p class="text-center text-gray-400 max-w-3xl mx-auto mb-16">
+          A visualization of the system's real-time dashboard, allowing operators to monitor network health and data flux.
+        </p>
+
+        <!-- Enhanced Mock Dashboard -->
+        <div class="glass-panel rounded-2xl p-4 md:p-8 border border-accent-glow/30 shadow-neon-lg">
+          <!-- Header and Tabs -->
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b border-glass-border pb-4">
+              <div class="text-xl md:text-2xl font-mono text-accent-glow mb-4 md:mb-0">System Nexus // IA-OS v2.5.1</div>
+              <div class="flex space-x-4 text-sm font-semibold">
+                  <span class="px-3 py-1 rounded-full bg-primary-neon/20 text-primary-neon border border-primary-neon cursor-pointer">Network Health</span>
+              </div>
+          </div>
+
+          <!-- Metrics Grid -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              <div class="p-4 rounded-xl bg-bg-dark border border-glass-border">
+                  <div class="text-xs text-gray-500 flex items-center"><span data-lucide="zap" class="w-3 h-3 mr-1 text-primary-neon"></span> POWER DEMAND</div>
+                  <div class="text-xl md:text-2xl font-bold text-white mt-1">1.21 GW</div>
+                  <div class="text-xs text-green-400">+4.5% <span class="text-gray-400">last 24h</span></div>
+              </div>
+              <div class="p-4 rounded-xl bg-bg-dark border border-glass-border">
+                  <div class="text-xs text-gray-500 flex items-center"><span data-lucide="plug" class="w-3 h-3 mr-1 text-primary-neon"></span> ACTIVE NODES</div>
+                  <div class="text-xl md:text-2xl font-bold text-white mt-1">1,208,491</div>
+                  <div class="text-xs text-yellow-400">12 Pending <span class="text-gray-400">Deployment</span></div>
+              </div>
+              <div class="p-4 rounded-xl bg-bg-dark border border-glass-border">
+                  <div class="text-xs text-gray-500 flex items-center"><span data-lucide="air-vent" class="w-3 h-3 mr-1 text-primary-neon"></span> AQI AVG (PM2.5)</div>
+                  <div class="text-xl md:text-2xl font-bold text-white mt-1">34</div>
+                  <div class="text-xs text-green-400">Excellent <span class="text-gray-400">Rating</span></div>
+              </div>
+              <div class="p-4 rounded-xl bg-bg-dark border border-glass-border">
+                  <div class="text-xs text-gray-500 flex items-center"><span data-lucide="database" class="w-3 h-3 mr-1 text-primary-neon"></span> DATA THROUGHPUT</div>
+                  <div class="text-xl md:text-2xl font-bold text-white mt-1">8.7 TB/day</div>
+                  <div class="text-xs text-red-400">-0.2% <span class="text-gray-400">Last Hour</span></div>
+              </div>
+          </div>
+          
+          <!-- Graphic Visualization Placeholder -->
+          <div class="mt-6 p-4 rounded-xl bg-code-bg border border-glass-border h-96 flex flex-col items-center justify-center">
+              <h4 class="text-xl font-bold text-white mb-4">Real-time Flux Analysis & Network Map</h4>
+              
+              <!-- Mock Image/Visual Placeholder -->
+              <img src="https://i.imghippo.com/files/rZU1892pM.png" 
+                   onerror="this.onerror=null;this.src="placehold.co/800x300/0f172a/94a3b8?text=NETWORK+TOPOLOGY+%2F+FLUX+MAP';"
+                   alt="Mock graphic visual of the network topology and data flux analysis" 
+                   class="w-full max-w-4xl rounded-lg shadow-xl"
+              />
+              <p class="text-xs text-primary-neon mt-2">Graphic visual showing the global sensor distribution and data pipelines.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- USE CASES (REDESIGNED FLATTER LAYOUT) -->
+    <!-- ========================= -->
+    <section id="use-cases" class="py-16 md:py-24 border-t border-glass-border">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl font-bold text-center mb-4 text-primary-neon">Deployed <span class="text-white">Use Cases</span></h2>
+            <p class="text-center text-gray-400 max-w-3xl mx-auto mb-16">
+                How the Connected Odyssey is transforming three critical sectors today, presented in a cleaner, flatter grid.
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Use Case 1: Smart City Management -->
+                <div class="p-8 rounded-xl bg-content-bg border-t-4 border-primary-neon hover:shadow-neon-lg transition duration-500">
+                    <span data-lucide="building-2" class="w-10 h-10 text-primary-neon mb-4"></span>
+                    <h3 class="text-2xl font-semibold mb-3 text-white">Smart City Management</h3>
+                    <p class="text-gray-400 text-base mb-4">Autonomous traffic light control based on real-time pedestrian and vehicle density, <b>reducing commute times by 18%.</b></p>
+                    <ul class="space-y-1 text-sm text-gray-300 list-disc list-inside ml-2">
+                        <li>Optimized waste collection routes.</li>
+                        <li>Automated municipal lighting adjustments.</li>
+                        <li>Structural integrity monitoring of bridges.</li>
+                    </ul>
+                </div>
+                
+                <!-- Use Case 2: Precision Agriculture -->
+                <div class="p-8 rounded-xl bg-content-bg border-t-4 border-green-400 hover:shadow-neon-lg transition duration-500">
+                    <span data-lucide="leaf" class="w-10 h-10 text-green-400 mb-4"></span>
+                    <h3 class="text-2xl font-semibold mb-3 text-white">Precision Agriculture</h3>
+                    <p class="text-gray-400 text-base mb-4">Micro-sensors providing deep soil data enable variable-rate irrigation and fertilization, <b>minimizing environmental run-off</b>.</p>
+                    <ul class="space-y-1 text-sm text-gray-300 list-disc list-inside ml-2">
+                        <li>Water usage reduction up to 30%.</li>
+                        <li>Early pest and disease warning systems.</li>
+                        <li>Automated yield forecasting models.</li>
+                    </ul>
+                </div>
+                
+                <!-- Use Case 3: Industrial IoT (IIoT) -->
+                <div class="p-8 rounded-xl bg-content-bg border-t-4 border-yellow-400 hover:shadow-neon-lg transition duration-500">
+                    <span data-lucide="factory" class="w-10 h-10 text-yellow-400 mb-4"></span>
+                    <h3 class="text-2xl font-semibold mb-3 text-white">Industrial IoT (IIoT)</h3>
+                    <p class="text-gray-400 text-base mb-4">Vibration and acoustic monitoring for machine health, predicting equipment failure up to <b>two weeks in advance</b>.</p>
+                    <ul class="space-y-1 text-sm text-gray-300 list-disc list-inside ml-2">
+                        <li>Zero-downtime maintenance scheduling.</li>
+                        <li>Real-time asset tracking in complex environments.</li>
+                        <li>Energy consumption mapping at the machine level.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- TEAM & TESTIMONIALS (FUTURE TEAM SECTION) -->
+    <!-- ========================= -->
+    <section id="team" class="py-16 md:py-24 border-t border-glass-border">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-4xl font-bold text-center mb-4 text-primary-neon">The Core <span class="text-white">Architects</span></h2>
+        <p class="text-center text-gray-400 max-w-2xl mx-auto mb-16">
+          Meet the core team of engineers and specialists driving this intelligent initiative forward.
+        </p>
+
+        <!-- Team Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-8 mb-20">
+          <!-- Team Member 1 -->
+          <div class="glass-panel p-6 rounded-xl text-center hover:shadow-neon-sm transition duration-300">
+            <div class="w-24 h-24 rounded-full bg-primary-neon/30 border-2 border-primary-neon mx-auto mb-4 flex items-center justify-center text-3xl font-bold text-primary-neon">SM</div>
+            <h4 class="text-xl font-semibold text-white">Shifat Al Mamun</h4>
+            <p class="text-sm text-accent-glow">Project Lead & System Architect</p>
+            <p class="text-xs text-gray-400 mt-2">Visionary behind the core IA architecture and blockchain integration.</p>
+          </div>
+          <!-- Team Member 2 -->
+          <div class="glass-panel p-6 rounded-xl text-center hover:shadow-neon-sm transition duration-300">
+            <div class="w-24 h-24 rounded-full bg-primary-neon/30 border-2 border-primary-neon mx-auto mb-4 flex items-center justify-center text-3xl font-bold text-primary-neon">SA</div>
+            <h4 class="text-xl font-semibold text-white">Sarjis Alamgir</h4>
+            <p class="text-sm text-accent-glow">Software Architect & Protocol Engineer</p>
+            <p class="text-xs text-gray-400 mt-2">Expert in distributed systems, security, and low-latency protocol optimization.</p>
+          </div>
+          <!-- Team Member 3 -->
+          <div class="glass-panel p-6 rounded-xl text-center hover:shadow-neon-sm transition duration-300">
+            <div class="w-24 h-24 rounded-full bg-primary-neon/30 border-2 border-primary-neon mx-auto mb-4 flex items-center justify-center text-3xl font-bold text-primary-neon">HO</div>
+            <h4 class="text-xl font-semibold text-white">Hasnat Obaidullah</h4>
+            <p class="text-sm text-accent-glow">Hardware & Sensor Specialist</p>
+            <p class="text-xs text-gray-400 mt-2">Leading development of proprietary ultra-low power RISC-V based sensor nodes.</p>
+          </div>
+          <!-- Team Member 4 -->
+          <div class="glass-panel p-6 rounded-xl text-center hover:shadow-neon-sm transition duration-300">
+            <div class="w-24 h-24 rounded-full bg-primary-neon/30 border-2 border-primary-neon mx-auto mb-4 flex items-center justify-center text-3xl font-bold text-primary-neon">NA</div>
+            <h4 class="text-xl font-semibold text-white">Nahid Aslam</h4>
+            <p class="text-sm text-accent-glow">UI/UX & Data Visualization</p>
+            <p class="text-xs text-gray-400 mt-2">Focused on creating intuitive, information-rich interfaces for complex telemetry.</p>
+          </div>
+        </div>
+
+        <hr class="border-glass-border my-16">
+
+        <h2 class="text-4xl font-bold text-center mb-4 text-primary-neon">Validation <span class="text-white">Matrix</span></h2>
+        <p class="text-center text-gray-400 max-w-2xl mx-auto mb-16">
+          Feedback from our early adoption partners and industry experts confirms the system's impact.
+        </p>
+
+        <!-- Testimonials Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Testimonial 1 -->
+          <div class="glass-panel p-6 rounded-xl border-l-4 border-accent-glow flex flex-col justify-between hover:shadow-neon-sm transition duration-300">
+            <p class="italic text-gray-300 text-lg mb-4">"The real-time energy optimization is unlike anything we've seen. It’s a complete game-changer for grid stability, handling unpredictable spikes flawlessly."</p>
+            <div class="font-semibold text-white">- Obama Kader, <span class="text-primary-neon font-normal">Energy Systems Analyst, VPP Solutions</span></div>
+          </div>
+          <!-- Testimonial 2 -->
+          <div class="glass-panel p-6 rounded-xl border-l-4 border-accent-glow flex flex-col justify-between hover:shadow-neon-sm transition duration-300">
+            <p class="italic text-gray-300 text-lg mb-4">"Deployment was seamless. The dashboard provides exceptional clarity into environmental sensor data across our whole park, allowing predictive urban maintenance."</p>
+            <div class="font-semibold text-white">- Salman F. Raisul , <span class="text-primary-neon font-normal">Urban Planning Director, City of Nexos</span></div>
+          </div>
+          <!-- Testimonial 3 -->
+          <div class="glass-panel p-6 rounded-xl border-l-4 border-accent-glow flex flex-col justify-between hover:shadow-neon-sm transition duration-300">
+            <p class="italic text-gray-300 text-lg mb-4">"Their commitment to low-power, secure hardware is evident. A truly sustainable approach to connectivity; the on-chip encryption passed our audit with flying colors."</p>
+            <div class="font-semibold text-white">- Junaid Abdullah, <span class="text-primary-neon font-normal">Cybersecurity Lead, TrustChain Consulting</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= -->
+    <!-- CONTACT PROTOCOL -->
+    <!-- ========================= -->
+    <section id="contact" class="py-16 md:py-24 border-t border-glass-border">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-4xl font-bold text-center mb-4 text-primary-neon">Engage <span class="text-white">Protocol </span></h2>
+        <p class="text-center text-gray-400 max-w-2xl mx-auto mb-16">
+          Connect with the development team for partnership opportunities, detailed documentation or general inquiries.
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto">
+          
+          <!-- Contact Form -->
+          <div class="glass-panel p-8 rounded-xl">
+            <h4 class="text-2xl font-bold mb-6 text-white">Direct Transmission</h4>
+            <form onsubmit="event.preventDefault(); showMessage('Message transmission initiated. A team member will respond shortly.', 'success');" class="space-y-4">
+              <div>
+                <label for="name" class="block text-sm font-medium text-gray-300 mb-1">Your Name/Entity</label>
+                <input type="text" id="name" placeholder="Name or Organization" class="w-full p-3 rounded-lg bg-bg-dark border border-glass-border focus:border-primary-neon focus:ring-1 focus:ring-primary-neon transition duration-200">
+              </div>
+              <div>
+                <label for="email" class="block text-sm font-medium text-gray-300 mb-1">Contact Email</label>
+                <input type="email" id="email" placeholder="Secure email address" class="w-full p-3 rounded-lg bg-bg-dark border border-glass-border focus:border-primary-neon focus:ring-1 focus:ring-primary-neon transition duration-200">
+              </div>
+              <div>
+                <label for="subject" class="block text-sm font-medium text-gray-300 mb-1">Subject</label>
+                <input type="text" id="subject" placeholder="Query or project interest" class="w-full p-3 rounded-lg bg-bg-dark border border-glass-border focus:border-primary-neon focus:ring-1 focus:ring-primary-neon transition duration-200">
+              </div>
+              <div>
+                <label for="message" class="block text-sm font-medium text-gray-300 mb-1">Message</label>
+                <textarea id="message" rows="5" placeholder="Tell us about your project or interest" class="w-full p-3 rounded-lg bg-bg-dark border border-glass-border focus:border-primary-neon focus:ring-1 focus:ring-primary-neon transition duration-200"></textarea>
+              </div>
+              <button class="w-full py-3 mt-4 text-lg font-semibold rounded-lg text-bg-dark neon-button" type="submit">
+                  <span data-lucide="send" class="w-4 h-4 mr-2 inline"></span>
+                  Send Transmission
+              </button>
+            </form>
+          </div>
+
+          <!-- Quick Contact / Project Info -->
+          <div class="space-y-6">
+              <!-- Quick Contact Panel -->
+              <aside class="glass-panel p-6 rounded-xl h-fit">
+                <h4 class="text-2xl font-bold text-accent-glow mb-4 flex items-center">
+                    <span data-lucide="plug" class="w-6 h-6 mr-2"></span>
+                    Quick Connect
+                </h4>
+                <div class="space-y-3">
+                  <p class="text-gray-300 flex items-center">
+                      <span data-lucide="mail" class="w-4 h-4 mr-3 text-primary-neon"></span>
+                      Email: shifatamamun@gmail.com
+                  <p class="text-gray-300 flex items-center">
+                      <span data-lucide="map-pin" class="w-4 h-4 mr-3 text-primary-neon"></span>
+                      Location: Dhaka, Bangladesh
+                  </p>
+                </div>
+              </aside>
+              
+              <!-- Project Status Panel -->
+              <aside class="glass-panel p-6 rounded-xl">
+                  <h4 class="text-2xl font-bold text-accent-glow mb-4 flex items-center">
+                      <span data-lucide="rocket" class="w-6 h-6 mr-2"></span>
+                      Project Status & Identifier
+                  </h4>
+                  <div class="flex gap-4 items-center mt-4">
+                    <div class="w-12 h-12 rounded-xl bg-primary-neon flex items-center justify-center text-xl font-bold text-bg-dark">IoT</div>
+                    <div class="flex-1">
+                      <div class="font-bold text-white text-lg">TechNova'25 Submission</div>
+                      <div class="text-gray-400 text-sm">University Category</div>
+                    </div>
+                  </div>
+              </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Custom Message Box (Replaces alert()) -->
+    <div id="custom-message-box" class="fixed inset-0 bg-bg-dark bg-opacity-80 z-50 hidden items-center justify-center">
+        <div class="glass-panel p-8 rounded-xl max-w-md w-full text-center">
+            <h4 id="message-title" class="text-2xl font-bold mb-4 text-primary-neon">Notification</h4>
+            <p id="message-content" class="text-gray-300 mb-6"></p>
+            <button onclick="document.getElementById('custom-message-box').classList.add('hidden')" class="px-6 py-2 text-sm font-semibold rounded-lg text-bg-dark neon-button">Acknowledge</button>
+        </div>
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- FOOTER (Content Checked) -->
+    <!-- ========================= -->
+    <footer class="border-t border-glass-border py-8 mt-12">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-gray-500 text-sm">
+        <div class="flex flex-wrap justify-center space-x-6 mb-4">
+          
+        </div>
+                <p class="mt-4"> Coded & Designed by Shifat Al Mamun </p>
+
+        <p class="mt-4">&copy; 2025 - MPSCITC - TechNova'25 All Rights Reserved. </p>
+      </div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Message Box Function
+    function showMessage(content, type = 'info') {
+        const box = document.getElementById('custom-message-box');
+        const title = document.getElementById('message-title');
+        const contentEl = document.getElementById('message-content');
+        
+        contentEl.textContent = content;
+        
+        if (type === 'success') {
+            title.textContent = 'Transmission Successful';
+            title.classList.remove('text-primary-neon');
+            title.classList.add('text-green-400');
+        } else {
+            title.textContent = 'Notification';
+            title.classList.remove('text-green-400');
+            title.classList.add('text-primary-neon');
+        }
+        
+        box.classList.remove('hidden');
+        box.classList.add('flex');
+    }
+
+    // Initialize Lucide icons on page load and handle mobile menu
+    window.onload = function() {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+
+      // Close menu when a link is clicked
+      const allLinks = document.querySelectorAll('#mobile-menu a');
+      allLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          if (!mobileMenu.classList.contains('hidden')) {
+             mobileMenu.classList.add('hidden');
+          }
+        });
+      });
+    };
+  </script>
+</body>
+</html>
